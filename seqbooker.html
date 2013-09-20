@@ -93,18 +93,18 @@
         <div class="ui-widget-overlay">
         </div>
     </div>
-    <div id="booking-form" class="ui-widget ui-widget-content ui-corner-all">
+    <div id="booking-form" >
         <form>
             <fieldset>
                 <legend>Booking Information</legend>
                 <label>Booking contact name:</label>
-                <input type="text" placeholder="Enter contact name"><br />
+                <input type="text" name="contact_name" placeholder="Enter contact name"><br />
                 <label>Booking contact phone:</label>
-                <input type="text" placeholder="Enter contact number"><br />
+                <input type="text" name="contact_phone" placeholder="Enter contact number"><br />
                 <label>Booking description:</label>
-                <input type="text" placeholder="Enter booking description"><br />
-                <button class="btn btn-primary" id="btn-booking-form-submit" >Submit booking</button>
-                <button class="btn btn-default" id="btn-booking-form-cancel">Cancel booking</button>
+                <input type="text" name="project_desc" placeholder="Enter booking description"><br />
+                <button class="btn btn-primary" id="booking-submit" >Submit booking</button>
+                <button class="btn btn-default" id="booking-cancel">Cancel booking</button>
             </fieldset>
         </form>
     </div>

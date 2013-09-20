@@ -83,16 +83,17 @@ if Meteor.isClient
         elem = '#'+seq
         $(elem).addClass('seq-selected')
 
-    Template.booking_form.created = ->
-        console.log 'created'
-
     Template.booking_form.rendered = ->
-        console.log 'rendered'
+        setFocus = @find('input[name=contact_name]')
+        $(setFocus).focus()
+                
 
     Template.booking_form.events =
-        'click #btn-booking-form-submit': (evt) ->
-            console.log 'event'
+        'click #booking-submit': (evt, template) ->
             evt.preventDefault()
+            contactName = template.find('input[name=contact_name]').value
+            contactPhone = template.find('input[name=contact_phone]').value
+            projectDesc = template.find('input[name=project_desc]').value
             dates = []
             $('table#calendar').find('td.ui-selected').each ->
                 datetime = $(this).children('time').attr 'datetime'
@@ -105,7 +106,7 @@ if Meteor.isClient
             else
                 MiseqBookings.insert { booking_dates : dates, view: view }
             notify_helper 'blind', 'Booking created', '', 400
-        'click #btn-booking-form-cancel': (evt) ->
+        'click #booking-cancel': (evt) ->
             evt.preventDefault()
             console.log 'cancel'
             $('.ui-widget-overlay').hide()
