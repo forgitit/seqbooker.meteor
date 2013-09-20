@@ -1,22 +1,226 @@
+
+#loader
+    position absolute
+    top 0
+    left 0
+    z-index 9999
+    width 100% 
+    height 100% 
+    background-image url('/images/background-trans.png')
+    background-repeat repeat
+    h1
+        text-align center
+        text-shadow none
+        color #dedede
+        margin 0
+        padding 0
+        font-weight 100
+    h3
+        text-align center
+        margin 0
+        padding 0
+        color #f8f8f8
+        font-weight 100
+    div
+        width 600px
+        border 4px solid #fff
+        position relative
+        top 100px
+        margin 0 auto
+        background #000
+        padding 10px
+        border-radius 15px
+        box-shadow 0 0 25px #000
+    img
+        margin 0
+        padding 0px 0px 20px 0px
+         
+
 .span9.center
     margin 0 auto
     float none
+    padding 10px 0px 
 
-#calendar
-    margin-top 25px
-    table
-        clear left
-        th
-            color red
-    .prev-month
+h1
+    text-shadow 1px 1px 3px #bbb
+
+h1 > small
+    text-shadow 1px 1px 1px #bbb
+
+#datepicker
+    float right
+
+#cal_wrapper
+//    box-shadow 0 0 20px #000
+//   margin-top 40px
+
+table#calendar
+    margin-bottom 0px
+    table-layout fixed
+    width 100%
+    th
+        color #555
+    th, td
+        width 125px
+    .day.today
+        background #ffff9d
+
+    .day
+        background #fff
+    .prev, .next
+        background #f8f8f8
+    .ui-selected
+        background-color #c4d7ed
+        time
+            color #0180f0
+    .ui-selecting
+        background #c4d7ed
+    .booked
+        background #0180f0
+    .booked.ui-selected
+        time
+            color #fff
+        background #FBB450
+    border-style none
+    border-width 1px
+    border-radius none
+    tr 
+        th:last-child, td:last-child
+            border-right 1px solid #ddd
+
+#top-toolbar.ui-toolbar 
+        margin-bottom 0px 
+    a.prev-month, span.prev-month
         float left
-    .next-month
+    a.next-month, span.next-month
         float right
-    h3.month
-        text-align center
+    a.next-month, button.prev-month
+        padding 0
+    span.ui-icon-circle-triangle-w, span.ui-icon-circle-triangle-e
+        margin-top 2px
+    span.ui-icon-circle-triangle-w
+        margin-right 3px    
+    span.ui-icon-circle-triangle-e
+        margin-left 3px    
+    span.month
+        padding-left 250px     
+        color #555
+        font-size 16px
 
-.today
-    color red
+#cp
+    margin-top 0px 
+    height 30px
+    h6.count 
+        float left
+    h5.seq-select-info
+        float right
+        padding-right 4px
+    a
+        float right
+        display block
+        cursor pointer
+        img
+            height 30px
+            padding 0px 4px 0px 0px
+            border 2px solid transparent 
+            border-image none
+            opacity 0.8
+        img.seq-selected
+            border 2px solid #aeee00
+            opacity 1
+            border-radius 5px
+    a:active, a:focus
+        outline none
 
-.day
+.ui-tooltip, .arrow:after
+    background #000
+    border 2px solid white
+
+.ui-tooltip
+    padding 10px 20px
+    color #fff
+    border-radius 20px
+    font bold 14px
+    text-transform uppercase
+    box-shadow 0 0 7px #000
+
+.arrow
+    width 70px
+    height 16px
+    overflow hidden
+    position absolute
+    left 50%
+    margin-left -35px
+    top -16px
+
+.arrow:after
+        content ""
+        position absolute
+        left 20px
+        bottom -20px
+        width 25px
+        height 25px
+        box-shadow 6px 5px 9px -9px #000
+        -webkit-transform rotate(45deg)
+        -moz-transform rotate(45deg)
+        -ms-transform rotate(45deg)
+        -o-transform rotate(45deg)
+        transform rotate(45deg)
+
+.arrow.top
+    top -16px
+    bottom auto
+
+.arrow.left
+    left 20%
+
+
+    
+#btn-book, #btn-unbook, #btn-info
+    width 75px
+    float right
+
+#btn-book.disabled, #btn-unbook.disabled
     background #fff
+
+#btn-unbook
+    margin 0px 5px 0px 5px
+
+#btn-book
+    margin-left 100px
+
+.notify-placeholder
+    height 40px
+
+#booking-form
+    width 400px
+    position absolute
+    padding 10px
+    top 100px
+    left 50%
+    margin-left -220px
+    box-shadow 0 0 20px #000
+    background #fff
+    z-index 9999
+    opacity 1
+    btn
+        float left
+
+#booking-form, .ui-widget-overlay
+    display none
+
+#notify
+    strong 
+        padding-left 5px
+        color red
+
+#admin
+    border 1px solid #000
+    box-shadow 0 0 10px #000
+    padding 10px
+    border-radius 10px
+    h3
+        margin-top 0
+
+#admin_info
+    display none

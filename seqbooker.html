@@ -1,21 +1,113 @@
 <head>
-  <title>test</title>
+  <title>SeqBooker Calendar</title>
 </head>
 
 <body>
-    <div class="row">
-        <div class="span9 center">
-            {{> cal}}
-        </div>
-    </div>
+    {{> main}}
 </body>
 
-<template name="cal">
-    <div id="calendar">
-        <div id="cal-panel"><a href="#" class="prev-month">Prev Month</a><a href="#" class="next-month">Next
-                Month</a>
+
+<template name="main">
+    {{#unless ready}}
+    <div id="loader">
+            <div>
+                <h1>SeqBooker is initialising...<br /><br />
+                    <img src="/images/loader.gif" alt="loading" /></h1>
+                <h3>Just a moment</h3>
+            </div>
         </div>
-        {{{calendar}}}
+    {{/unless}}
+    <div class="row">
+        <div class="span9 center">
+            <h1>SeqBooker <small>sequence resource booking calendar</small></h1>
+            <div id="cal_wrapper">
+                {{> cal}}
+                {{> control_panel}}
+            </div>
+            {{> notify}}
+            {{> booking_form}}
+        </div>
     </div>
-</div>
+    <div class="row">
+        <div class="span9 center">
+            {{> admin}}
+        </div>
+    </div>
 </template>
+
+<template name="admin">
+    <div id="admin">
+        <h3>Admin Panel</h3>
+        <button class="btn btn-danger destroy">Remove all bookings</button>
+        <button class="btn btn-info show_view_bookings">Show all bookings</button>
+    </div>
+    <div id="admin_info">
+        <ul>
+        <li>{{info}}</li>
+        </ul>
+    </div>
+</template>
+
+<template name="notify">
+    <div class="notify-placeholder">
+        <div class="ui-widget" id="notify">
+            <div class="ui-state-{{notify.state}} ui-corner-all">
+                <strong>Notice: </strong>{{notify.message}}
+            </div>
+        </div>
+    </div>
+</template>
+
+<template name="cal">
+    <div id="top-toolbar" class="ui-toolbar ui-corner-all ui-widget-all">
+        <a href="#" class="prev-month" id="go-prev"><span class="ui-icon ui-icon-circle-triangle-w prev-month"></span> Prev
+        Month</a>
+        <span class="month">{{calendar.strMonth}} {{calendar.year}}</span>
+        <a href="#" class="next-month" id="go-next"><span class="ui-icon ui-icon-circle-triangle-e next-month"></span> Next
+            Month</a>
+    </div>
+    <table class='table table-bordered' id="calendar">
+        <tr>
+            <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+        </tr>
+        
+        {{{calendar.html}}}
+    </table>
+</template>
+
+<template name="control_panel">
+    <div id="cp" class="ui-toolbar ui-corner-all ui-widget-all">
+        <h6 class="count">There are {{count}} bookings in the current view</h6>
+        <button class="btn btn-info ui-corner-all" id="btn-info">Info</button>
+        <button class="btn btn-warning ui-corner-all" id="btn-unbook">Unbook</button>
+        <button class="btn btn-primary ui-corner-all" id="btn-book">Book</button>
+        <a href="#" class="seq-select" title="Select HiSeq"><img src="/images/hiseq_1000.jpg" id="hiseq" alt="hiseq"  /></a>
+        <a href="#" class="seq-select" title="Select MiSeq"><img src="/images/miseq.jpg" id="miseq" alt="miseq"  /></a>
+        <h5 class="seq-select-info">{{#if selected}}<strong>{{selected}} selected </strong>{{else}}Select your
+            sequencer: {{/if}}</h5>
+    </div>
+</template>
+
+<template name="booking_form">
+    <div class="ui-overlay">
+        <div class="ui-widget-overlay">
+        </div>
+    </div>
+    <div id="booking-form" class="ui-widget ui-widget-content ui-corner-all">
+        <form>
+            <fieldset>
+                <legend>Booking Information</legend>
+                <label>Booking contact name:</label>
+                <input type="text" placeholder="Enter contact name"><br />
+                <label>Booking contact phone:</label>
+                <input type="text" placeholder="Enter contact number"><br />
+                <label>Booking description:</label>
+                <input type="text" placeholder="Enter booking description"><br />
+                <button class="btn btn-primary" id="btn-booking-form-submit" >Submit booking</button>
+                <button class="btn btn-default" id="btn-booking-form-cancel">Cancel booking</button>
+            </fieldset>
+        </form>
+    </div>
+</template>
+
+
