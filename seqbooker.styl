@@ -1,3 +1,5 @@
+body
+    overflow hidden
 
 #loader
     position absolute
@@ -40,35 +42,51 @@
     margin 0 auto
     float none
     padding 10px 0px 
+    h1
+        text-shadow 1px 1px 3px #bbb
 
-h1
-    text-shadow 1px 1px 3px #bbb
+    h1 > small
+        text-shadow 1px 1px 1px #bbb
+    h1 > span
+        text-shadow none
+        font-size 16px
+        float right
+        line-height 16px
+        margin-top 20px
 
-h1 > small
-    text-shadow 1px 1px 1px #bbb
-
-#datepicker
-    float right
-
-#cal_wrapper
-//    box-shadow 0 0 20px #000
-//   margin-top 40px
+#login-buttons a
+    font-size 14px
 
 table#calendar
     margin-bottom 0px
     table-layout fixed
-    width 100%
+    tr.day-names 
+        th
+            height 20px
     th
         color #555
     th, td
-        width 125px
+        min-width 100px
+        height 22px
     .day.today
         background #ffff9d
-
+    .day.today.booked
+        background #0180f0
+        color #ffff9d
+    .booked 
+        cursor pointer 
+        div
+            float right
+            overflow hidden
+            display block
+            small 
+                padding 0px 10px 0px 0px
+                color #fff
+                cursor pointer
     .day
-        background #fff
-    .prev, .next
         background #f8f8f8
+    .prev, .next
+        background #dedede
     .ui-selected
         background-color #c4d7ed
         time
@@ -87,6 +105,26 @@ table#calendar
     tr 
         th:last-child, td:last-child
             border-right 1px solid #ddd
+
+table#calendar.bookable
+    .day
+        background #fff
+    .prev, .next
+        background #f8f8f8
+    .day.today.booked
+        background #0180f0
+        color #ffff9d
+    .ui-selecting
+        background #c4d7ed
+    .booked
+        background #0180f0
+    .ui-selected
+        background-color #c4d7ed
+    .booked.ui-selected
+        time
+            color #fff
+        background #FBB450
+
 
 #top-toolbar.ui-toolbar 
         margin-bottom 0px 
@@ -112,9 +150,6 @@ table#calendar
     height 30px
     h6.count 
         float left
-    h5.seq-select-info
-        float right
-        padding-right 4px
     a
         float right
         display block
@@ -131,6 +166,28 @@ table#calendar
             border-radius 5px
     a:active, a:focus
         outline none
+    h5.login
+        float right
+        margin-right 10px
+        color #888
+    .btn
+        width 75px
+        float right
+    .btn-unbook 
+        margin 0px 5px 0px 5px
+
+    .btn-book
+        margin-left 100px
+
+
+#seq-selector
+    float left
+    width 250px 
+    margin 0px 10px
+    h5
+        float right
+        padding-right 4px
+
 
 .ui-tooltip, .arrow:after
     background #000
@@ -175,24 +232,12 @@ table#calendar
     left 20%
 
 
-    
-#btn-book, #btn-unbook, #btn-info
-    width 75px
-    float right
 
-#btn-book.disabled, #btn-unbook.disabled
-    background #fff
-
-#btn-unbook
-    margin 0px 5px 0px 5px
-
-#btn-book
-    margin-left 100px
 
 .notify-placeholder
     height 40px
 
-#booking-form
+#booking-form, #booking-info
     width 400px
     position absolute
     padding 10px
@@ -201,10 +246,35 @@ table#calendar
     margin-left -220px
     box-shadow 0 0 20px #000
     background #fff
+    border-radius 10px
     z-index 9999
+    legend
+        margin-bottom 0
+    small
+        display none
+        color red
+    .invalid
+        height: 20px
 
-#booking-form, .ui-widget-overlay
-    display none
+#booking-info
+    padding 5px
+    color #fff
+    background #ccc
+    legend
+        color #fff
+    div
+        float left
+        border 2px solid #ccc
+        border-radius 10px
+        background #0180f0
+        padding 5px 
+        width 385px
+    .btn
+        float right
+        width 60px
+    h3
+        font-size 16px
+        font-weight 100
 
 #notify
     strong 

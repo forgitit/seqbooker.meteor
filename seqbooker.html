@@ -19,13 +19,14 @@
     {{/unless}}
     <div class="row">
         <div class="span9 center">
-            <h1>SeqBooker <small>sequence resource booking calendar</small></h1>
+            <h1>SeqBooker <small>sequence resource booking calendar</small><span>{{loginButtons align="right"}}</span></h1>
             <div id="cal_wrapper">
                 {{> cal}}
                 {{> control_panel}}
             </div>
             {{> notify}}
             {{> booking_form}}
+            {{> booking_info}}
         </div>
     </div>
     <div class="row">
@@ -36,6 +37,7 @@
 </template>
 
 <template name="admin">
+{{#if info}}
     <div id="admin">
         <h3>Admin Panel</h3>
         <button class="btn btn-danger destroy">Remove all bookings</button>
@@ -46,16 +48,19 @@
         <li>{{info}}</li>
         </ul>
     </div>
+{{/if}}
 </template>
 
 <template name="notify">
+    {{#if notify}}
     <div class="notify-placeholder">
         <div class="ui-widget" id="notify">
-            <div class="ui-state-{{notify.state}} ui-corner-all">
-                <strong>Notice: </strong>{{notify.message}}
+            <div class="ui-state-highlight ui-corner-all">
+                <strong>Notice: </strong>{{notify}}
             </div>
         </div>
     </div>
+    {{/if}}
 </template>
 
 <template name="cal">
@@ -66,8 +71,8 @@
         <a href="#" class="next-month" id="go-next"><span class="ui-icon ui-icon-circle-triangle-e next-month"></span> Next
             Month</a>
     </div>
-    <table class='table table-bordered' id="calendar">
-        <tr>
+    <table class='table table-bordered {{#if bookable}}bookable{{/if}}' id="calendar">
+        <tr class="day-names">
             <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
         </tr>
         
@@ -79,16 +84,25 @@
     <div id="cp" class="ui-toolbar ui-corner-all ui-widget-all">
         <h6 class="count">There are {{count}} bookings in the current view</h6>
         <button class="btn btn-info ui-corner-all" id="btn-info">Info</button>
-        <button class="btn btn-warning ui-corner-all" id="btn-unbook">Unbook</button>
-        <button class="btn btn-primary ui-corner-all" id="btn-book">Book</button>
-        <a href="#" class="seq-select" title="Select HiSeq"><img src="/images/hiseq_1000.jpg" id="hiseq" alt="hiseq"  /></a>
-        <a href="#" class="seq-select" title="Select MiSeq"><img src="/images/miseq.jpg" id="miseq" alt="miseq"  /></a>
-        <h5 class="seq-select-info">{{#if selected}}<strong>{{selected}} selected </strong>{{else}}Select your
+        {{#if currentUser}}
+        {{#if bookable}}
+        <button class="btn ui-corner-all btn-unbook {{#unless verified}}btn-false btn-default{{else}}btn-warning{{/unless}}" id="{{#if verified}}btn-unbook{{/if}}">Unbook</button>
+        <button class="btn ui-corner-all btn-book {{#unless verified}}btn-default btn-false{{else}}btn-primary{{/unless}}" id="{{#if verified}}btn-book{{/if}}">Book</button>
+        {{/if}}
+        {{else}}
+        <h5 class="login">Login to book/unbook</h5>
+        {{/if}}
+        <div id="seq-selector">
+            <a href="#" class="seq-select" title="Select HiSeq"><img src="/images/hiseq_1000.jpg" id="hiseq" alt="hiseq"  /></a>
+            <a href="#" class="seq-select" title="Select MiSeq"><img src="/images/miseq.jpg" id="miseq" alt="miseq"  /></a>
+            <h5>{{#if selected}}<strong>{{selected}} selected </strong>{{else}}Select your
             sequencer: {{/if}}</h5>
+        </div>
     </div>
 </template>
 
 <template name="booking_form">
+    {{#if book_form}}
     <div class="ui-overlay">
         <div class="ui-widget-overlay">
         </div>
@@ -97,17 +111,43 @@
         <form>
             <fieldset>
                 <legend>Booking Information</legend>
+                <div class="invalid">
+                    <small>Please fill out all fields!</small>
+                </div>
                 <label>Booking contact name:</label>
-                <input type="text" name="contact_name" placeholder="Enter contact name"><br />
+                <input type="text" name="contact_name" placeholder="Enter contact name" autofocus><br />
                 <label>Booking contact phone:</label>
                 <input type="text" name="contact_phone" placeholder="Enter contact number"><br />
                 <label>Booking description:</label>
                 <input type="text" name="project_desc" placeholder="Enter booking description"><br />
+                <label>Upload sample sheet:</label>
+                <input type="file" name="sample_sheet" /><br /><br />
                 <button class="btn btn-primary" id="booking-submit" >Submit booking</button>
                 <button class="btn btn-default" id="booking-cancel">Cancel booking</button>
             </fieldset>
         </form>
     </div>
+    {{/if}}
+    </template>
+
+<template name="booking_info">
+    {{#if info}}
+    <div class="ui-overlay">
+        <div class="ui-widget-overlay">
+        </div>
+    </div>
+    <div id ="booking-info">
+        <div>
+            <legend>Booking details</legend>
+            <h3><span>Booking dates:</span> {{info.beginDate}} - {{info.endDate}}</h3>
+            <h3><span>Contact name:</span> {{info.contactName}}</h3>
+            <h3><span>Contact phone:</span> {{info.contactPhone}}</h3>
+            <h3><span>Project description: </span>{{info.projectDesc}}</h3>
+            <button class="btn btn-default" id="info-close">Close</button>
+        </div>
+    </div>
+    {{/if}}
 </template>
+
 
 
