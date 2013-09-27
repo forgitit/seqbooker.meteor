@@ -8,6 +8,10 @@ MiseqBookings = new Meteor.Collection 'MiseqBookings'
 # Server
 if Meteor.isServer
 
+    Meteor.startup( ->
+        process.env.MAIL_URL = "smtp://sign-up%40seqbooker.mailgun.org:wxy354KLOP99CX@smtp.mailgun.org:587"
+    )
+
     Meteor.methods({
         removeAll: () ->
             console.log 'Removing all items from collection...'
@@ -19,13 +23,30 @@ if Meteor.isServer
         sendEmail: (to, from, subject, text) ->
             check([to, from, subject, text], [String])
             this.unblock()
-
             Email.send(
                 to: to
                 from: from
                 subject: subject
                 text: text
             )
+        initNewUser: (email) ->
+            if Meteor.users.find('emails.address': email).count() > 0
+                console.log email
+                console.log 'email exists'
+                return false
+            else
+                uid = Accounts.createUser(email: email)
+                Meteor.call('sendEmail',
+                    email,
+                    'admin@seqbooker.plantenergy.uwa.edu.au',
+                    'SeqBooker Sign-up Request',
+                    'Sign up!',
+                    (error, result) ->
+                        if error
+                            return false
+                        else
+                            return true
+                )
     })
 
     Meteor.publish('HiseqBookings', ->
@@ -53,13 +74,9 @@ if Meteor.isServer
         sendVerificationEmail: true
         forbidClientAccountCreation: false
     )
-    Accounts.onCreateUser( (options,user) ->
-        console.log user
-        Accounts.sendVerificationEmail user._id
-    )
 
     Accounts.emailTemplates.siteName = 'SeqBooker'
-    Accounts.emailTemplates.from = 'No reply <noreply@seqbooker.plantenergy.uwa.edu.au'
+    Accounts.emailTemplates.from = 'admin@seqbooker.plantenergy.uwa.edu.au'
 
 ###########################################################
 # Client
@@ -79,15 +96,126 @@ if Meteor.isClient
 
     Deps.autorun( ->
         if Meteor.user()
-            Session.set 'user', true
-            Meteor.subscribe 'userData', Session.get 'user'
-        else
-            Session.set 'user', false
+            Meteor.subscribe 'userData', Meteor.userId
     )
 
-    Accounts.ui.config(
-        passwordSignupFields: 'EMAIL_ONLY'
-    )
+    Template.login.logged_in = ->
+        if Meteor.user()
+            Meteor.user().emails[0].address
+        else
+            false
+
+    Template.login.events =
+        'keydown': (evt, template) ->
+            form = template.find('form:visible')
+            if evt.which is 13
+                if $(form).attr('id') is 'sign-in-form'
+                    login_helper(form)
+                else if $(form).attr('id') is 'create-account-form'
+                    account_create_helper(form)
+                else if $(form).attr('id') is 'change-password-form'
+                    change_password_helper(form)
+            else if evt.which is 27
+                $(form).hide()
+                $('#login').show()
+        'click #login': (evt,template) ->
+            evt.preventDefault()
+            $(evt.target).hide()
+            form = template.find('form#sign-in-form')
+            $(form).show()
+            $(form).find('input[name="email_address"]').focus()
+        'click #logout': (evt, template) ->
+            evt.preventDefault()
+            $(evt.target).hide()
+            form = template.find('form#sign-out-form')
+            $(form).show()
+        'click #submit-logout': (evt, template) ->
+            evt.preventDefault()
+            Meteor.logout()
+            form = template.find('form:visible')
+            $(form).hide()
+        'click .close-sign-in': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            $(form).hide()
+            span = template.find('span')
+            $(span).hide()
+            $('#login').show()
+        'click #submit-login': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            login_helper(form)
+        'click #account-create': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            $(form).hide()
+            form = template.find('form#create-account-form')
+            $(form).show()
+            $(form).find('input[type="text"]').focus()
+        'click #submit-account': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            account_create_helper(form)
+        'click #request-change-password': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            $(form).hide()
+            $('#change-password-form').show()
+        'click #submit-password-change': (evt, template) ->
+            evt.preventDefault()
+            form = template.find('form:visible')
+            $(form).find('input[name="old_password"]').focus()
+            change_password_helper(form)
+        'click #request-forgot-password': (evt, template) ->
+            evt.preventDefault()
+
+    change_password_helper = (form) ->
+        old = $(form).find('input[name="old_password"]').val()
+        new_pass = $(form).find('input[name="new_password"]').val()
+        Accounts.changePassword(old, new_pass, (err) ->
+            if err
+                console.log 'error'
+                $(form).find('small').show().fadeOut(2500)
+                return false
+            else
+                console.log 'success'
+                $(form).find('small').text('Updating details...').show().fadeOut(2500)
+                $('#login').show()
+                $(form).hide()
+        )
+
+    login_helper = (form) ->
+        email = $(form).find('input[name="email_address"]').val()
+        password= $(form).find('input[name="password"]').val()
+        error = $(form).find('span')
+        if not email
+            error.text('No email supplied!').show().fadeOut(2500)
+            return false
+        if not password
+            error.text('No password supplied!').show().fadeOut(2500)
+            return false
+        Meteor.loginWithPassword(email, password, (err) ->
+            if err
+                error.text('Server error').show().fadeOut(2500)
+            else
+                $('form#sign-in').hide()
+        )
+
+    account_create_helper = (form) ->
+        input = $(form).find('input[name="email_address"]')
+        email = $(input).val()
+        err = $(form).find('span')
+        if not email
+            $(err).text('No email supplied!').show().fadeOut(2500)
+            return false
+        Meteor.call('initNewUser', email, (error, result) ->
+            if not error
+                $(form).hide()
+                console.log 'enrollment sent'
+            else
+                $(error).text('Email address already in use!').show().fadeOut(2500)
+                return false
+        )
 
 
     Meteor.startup ->
@@ -117,7 +245,7 @@ if Meteor.isClient
         bookable: ->
             Session.get 'bookable'
         verified: ->
-            if Meteor.userId() and Meteor.user().emails[0].verified
+            if Meteor.userId()and Meteor.user().emails[0].verified
                 Session.set 'verified', true
             else
                 Session.set 'verified', false
@@ -331,7 +459,7 @@ if Meteor.isClient
         notify
 
     Template.admin.info = ->
-        if Meteor.userId() and Meteor.user().admin
+        if Meteor.user() and Meteor.user().admin
             view = Session.get 'view'
             view = view.toString 'MMyy'
             bookings = HiseqBookings.find({view: view}).fetch()

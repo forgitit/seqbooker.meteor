@@ -19,7 +19,7 @@
     {{/unless}}
     <div class="row">
         <div class="span9 center">
-            <h1>SeqBooker <small>sequence resource booking calendar</small><span>{{loginButtons align="right"}}</span></h1>
+            <h1>SeqBooker <small>sequence resource booking calendar</small><span>{{> login}}</span></h1>
             <div id="cal_wrapper">
                 {{> cal}}
                 {{> control_panel}}
@@ -32,6 +32,58 @@
     <div class="row">
         <div class="span9 center">
             {{> admin}}
+        </div>
+    </div>
+    </template>
+
+<template name="login">
+    <div id="login-widget">
+        <div>
+            <button class="btn btn-link" id="{{#unless logged_in}}login{{else}}logout{{/unless}}">{{#if logged_in}}{{logged_in}}{{else}}sign-in{{/if}}</button>
+            <form id="sign-in-form">
+                <button class="btn btn-link close-sign-in">close</button>
+                <fieldset>
+                    <legend>Sign In</legend>
+                    <label>Email address:</label>
+                    <input type='text' name='email_address' autocomplete="off" placeholder='enter email address' />
+                    <label>Password:</label>
+                    <input type="password" name='password' placeholder='enter your password' />
+                    <button class="btn btn-primary" id="submit-login">Submit</button>
+                    <button class="btn btn-link" id="request-forgot-password">Forgot password</button><button class="btn btn-link"
+                        id="account-create">Create
+                        account</button>
+                   {{#if loggingIn}}<h3>Logging in<img src="/images/login_loader.gif" /></h3>{{/if}}
+                    <span></span>
+                </fieldset>
+            </form>
+            <form id="sign-out-form">
+                <button class="btn btn-warning" id="submit-logout">Sign-out</button>
+                <button class="btn btn-info" id="request-change-password">Change password</button>
+            </form>
+            <form id="create-account-form">
+                <button class="btn btn-link close-sign-in">close</button>
+                <fieldset>
+                    <legend>Create account</legend>
+                    <small>Please provide your email address and you will receive a verification email that will allow
+                        you to set a password to use the booking system</small>
+                    <label>Email address:</label>
+                    <input type='text' name='email_address' autocomplete="off" placeholder='enter email address' />
+                    <button class="btn btn-primary" id="submit-account">Submit</button>
+                    <span></span>
+                </fieldset>
+            </form>
+            <form id="change-password-form">
+                <button class="btn btn-link close-sign-in">close</button>
+                <fieldset>
+                    <legend>Change password</legend>
+                    <label>Old password:</label>
+                    <input type="password" name='old_password' placeholder='enter your existing password' />
+                    <label>New password:</label>
+                    <input type="password" name='new_password' placeholder='enter your new password' />
+                    <button class="btn btn-warning" id="submit-password-change">Submit</button>
+                    <small>Your old password did not match!</small>
+                </fieldset>
+            </form>
         </div>
     </div>
 </template>

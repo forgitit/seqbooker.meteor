@@ -54,8 +54,74 @@ body
         line-height 16px
         margin-top 20px
 
-#login-buttons a
-    font-size 14px
+#login-widget
+    div
+        position relative
+        #login, #logout
+            margin-top -6px
+    form
+        position absolute
+        padding 5px 8px 8px 8px
+        border 2px solid #ccc
+        border-radius 10px
+        background #fff
+        z-index 9999
+        top -20px
+        left -250px
+        display none
+        box-shadow 0 0 8px #bbb
+        .close-sign-in
+            float right
+            text-align right
+            padding 0
+            margin 0
+        .btn-primary
+            width 230px
+        input
+            width 220px
+        legend
+            padding-top 0 
+            font-size 16px
+            line-height 25px
+            margin 0px 0px 10px 0px
+        span 
+            display none
+            padding 4px 0px 
+            height 20px
+            float left
+            width 230px
+            color red
+            font-size 12px
+    form#sign-in-form
+        .btn-link 
+            margin 0
+            margin-top 5px
+            padding 0
+            font-size 12px
+        #account-forgot
+            float left
+        #account-create
+            float right
+    form#sign-out-form
+        .btn
+            width 228px
+            margin 5px 0px
+    form#create-account-form
+        padding-bottom 10px 
+        small
+            font-size 14px
+        label 
+            margin-top 10px
+    form#change-password-form
+        .btn
+            width 230px
+        small
+            display none
+            color red
+            font-size 14px
+            margin 10px 0px 
+        small.success
+            color green
 
 table#calendar
     margin-bottom 0px
