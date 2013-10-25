@@ -1,6 +1,9 @@
 body
     overflow hidden
 
+#cal_wrapper
+    box-shadow 0 0 20px 5px #bbb
+
 #loader
     position absolute
     top 0
@@ -53,6 +56,14 @@ body
         float right
         line-height 16px
         margin-top 20px
+    span.atype
+        color #41a0f2
+    span.ttype
+        color #3a8c23
+    span.ctype
+        color #f24141
+    span.gtype
+        color #f2a03d
 
 #login-widget
     div
@@ -86,10 +97,9 @@ body
             margin 0px 0px 10px 0px
         span 
             display none
-            padding 4px 0px 
+            padding 4px 4px 
             height 20px
             float left
-            width 230px
             color red
             font-size 12px
     form#sign-in-form
@@ -103,6 +113,11 @@ body
         #account-create
             float right
     form#sign-out-form
+        .btn-link
+            margin 0
+            margin-top 5px
+            padding 0
+            font-size 12px
         .btn
             width 228px
             margin 5px 0px
@@ -126,16 +141,22 @@ body
 table#calendar
     margin-bottom 0px
     table-layout fixed
+    tr
+        th:first-child, th:last-child, td:first-child, td:last-child
+            border-radius 0
     tr.day-names 
-        th
-            height 20px
+        th 
+            height 14px 
+            padding 3px 8px 
+            background #888
+            color #fff
     th
         color #555
     th, td
         min-width 100px
         height 22px
     .day.today
-        background #ffff9d
+        background #f4bfad
     .day.today.booked
         background #0180f0
         color #ffff9d
@@ -173,18 +194,22 @@ table#calendar
             border-right 1px solid #ddd
 
 table#calendar.bookable
-    .day
-        background #fff
-    .prev, .next
+    .day,.day.next
+        background #f3f7e6
+    .day.disable
         background #f8f8f8
+    .day.today
+        background #f4bfad
     .day.today.booked
         background #0180f0
         color #ffff9d
-    .ui-selecting
+    .day.disable
+        background #f8f8f8
+    .ui-selecting, .next.ui-selecting
         background #c4d7ed
-    .booked
+    .booked, .next.booked
         background #0180f0
-    .ui-selected
+    .ui-selected, .next.ui-selected
         background-color #c4d7ed
     .booked.ui-selected
         time
@@ -193,7 +218,9 @@ table#calendar.bookable
 
 
 #top-toolbar.ui-toolbar 
-        margin-bottom 0px 
+    border-radius 0
+    margin-bottom 0px 
+    position relative
     a.prev-month, span.prev-month
         float left
     a.next-month, span.next-month
@@ -210,7 +237,11 @@ table#calendar.bookable
         padding-left 250px     
         color #555
         font-size 16px
-
+    #curr-month
+        position absolute
+        top:7px
+        left 370px
+        
 #cp
     margin-top 0px 
     height 30px
@@ -245,6 +276,8 @@ table#calendar.bookable
     .btn-book
         margin-left 100px
 
+#cp.ui-toolbar
+    border-radius 0
 
 #seq-selector
     float left
@@ -313,6 +346,7 @@ table#calendar.bookable
     box-shadow 0 0 20px #000
     background #fff
     border-radius 10px
+    border 4px solid #0f8ff2
     z-index 9999
     legend
         margin-bottom 0
@@ -321,16 +355,20 @@ table#calendar.bookable
         color red
     .invalid
         height: 20px
+    input[type=text]
+        width 390px
+    .btn
+        width 198px
 
 #booking-info
     padding 5px
     color #fff
-    background #ccc
+    background #000
     legend
         color #fff
     div
         float left
-        border 2px solid #ccc
+        border 2px solid #000
         border-radius 10px
         background #0180f0
         padding 5px 
@@ -341,6 +379,9 @@ table#calendar.bookable
     h3
         font-size 16px
         font-weight 100
+
+#notify-container
+    height 25px 
 
 #notify
     strong 
@@ -357,3 +398,24 @@ table#calendar.bookable
 
 #admin_info
     display none
+
+#enroll
+    margin 15px
+    div
+        background #f8f8f8
+        padding 10px
+        border 4px solid #7b98a6
+        border-radius 10px 
+        background #fff
+    h4 
+        padding 5px 0px
+    input
+        margin 5px 0px
+    button
+        margin-top 10px
+    label
+        margin-top 10px
+
+#help-info
+    text-align center
+    margin-top 30px

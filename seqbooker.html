@@ -2,9 +2,9 @@
   <title>SeqBooker Calendar</title>
 </head>
 
-<body>
-    {{> main}}
-</body>
+<template name="layout">
+    {{yield}}
+</template>
 
 
 <template name="main">
@@ -19,7 +19,9 @@
     {{/unless}}
     <div class="row">
         <div class="span9 center">
-            <h1>SeqBooker <small>sequence resource booking calendar</small><span>{{> login}}</span></h1>
+            <h1>SeqBooker <small><span class="atype">s</span><span class="ttype">e</span><span class="ttype">q</span><span
+                                    class="ctype">u</span><span class="atype">e</span><span class="gtype">n</span><span
+                                    class="gtype">c</span><span class="ctype">e</span> resource booking calendar</small><span>{{> login}}</span></h1>
             <div id="cal_wrapper">
                 {{> cal}}
                 {{> control_panel}}
@@ -27,6 +29,10 @@
             {{> notify}}
             {{> booking_form}}
             {{> booking_info}}
+            <div id="help-info">
+                <h5>For help or reporting bugs/feature requests please contact <a
+                        href="mailto:hayden.walker@uwa.edu.au">Seqbooker Admin</a></h5>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -57,6 +63,8 @@
                 </fieldset>
             </form>
             <form id="sign-out-form">
+                <button class="btn btn-link close-sign-in">close</button>
+                <legend>Sign Out</legend>
                 <button class="btn btn-warning" id="submit-logout">Sign-out</button>
                 <button class="btn btn-info" id="request-change-password">Change password</button>
             </form>
@@ -64,7 +72,7 @@
                 <button class="btn btn-link close-sign-in">close</button>
                 <fieldset>
                     <legend>Create account</legend>
-                    <small>Please provide your email address and you will receive a verification email that will allow
+                    <small>Please provide an email address to use for your account. You will receive a verification email that will allow
                         you to set a password to use the booking system</small>
                     <label>Email address:</label>
                     <input type='text' name='email_address' autocomplete="off" placeholder='enter email address' />
@@ -104,22 +112,25 @@
 </template>
 
 <template name="notify">
-    {{#if notify}}
-    <div class="notify-placeholder">
-        <div class="ui-widget" id="notify">
-            <div class="ui-state-highlight ui-corner-all">
-                <strong>Notice: </strong>{{notify}}
+    <div id="notify-container">
+        {{#if notify}}
+        <div class="notify-placeholder">
+            <div class="ui-widget" id="notify">
+                <div class="ui-state-highlight ui-corner-all">
+                    <strong>Notice: </strong>{{notify}}
+                </div>
             </div>
         </div>
+        {{/if}}
     </div>
-    {{/if}}
 </template>
 
 <template name="cal">
-    <div id="top-toolbar" class="ui-toolbar ui-corner-all ui-widget-all">
+    <div id="top-toolbar" class="ui-toolbar  ui-widget-all">
         <a href="#" class="prev-month" id="go-prev"><span class="ui-icon ui-icon-circle-triangle-w prev-month"></span> Prev
         Month</a>
-        <span class="month">{{calendar.strMonth}} {{calendar.year}}</span>
+    <span class="month"><div id="curr-month" title="Click to return to current month"><a href="#" >{{calendar.strMonth}}
+                {{calendar.year}}</a></div></span>
         <a href="#" class="next-month" id="go-next"><span class="ui-icon ui-icon-circle-triangle-e next-month"></span> Next
             Month</a>
     </div>
@@ -133,13 +144,13 @@
 </template>
 
 <template name="control_panel">
-    <div id="cp" class="ui-toolbar ui-corner-all ui-widget-all">
+    <div id="cp" class="ui-toolbar  ui-widget-all">
         <h6 class="count">There are {{count}} bookings in the current view</h6>
-        <button class="btn btn-info ui-corner-all" id="btn-info">Info</button>
         {{#if currentUser}}
+        <button class="btn btn-info ui-corner-all" id="btn-info">Info</button>
         {{#if bookable}}
-        <button class="btn ui-corner-all btn-unbook {{#unless verified}}btn-false btn-default{{else}}btn-warning{{/unless}}" id="{{#if verified}}btn-unbook{{/if}}">Unbook</button>
-        <button class="btn ui-corner-all btn-book {{#unless verified}}btn-default btn-false{{else}}btn-primary{{/unless}}" id="{{#if verified}}btn-book{{/if}}">Book</button>
+        <button class="btn ui-corner-all btn-unbook btn-warning" id="btn-unbook">Unbook</button>
+        <button class="btn ui-corner-all btn-book btn-primary" id="btn-book">Book</button>
         {{/if}}
         {{else}}
         <h5 class="login">Login to book/unbook</h5>
@@ -162,7 +173,7 @@
     <div id="booking-form" >
         <form>
             <fieldset>
-                <legend>Booking Information</legend>
+                <legend>Enter Booking Information</legend>
                 <div class="invalid">
                     <small>Please fill out all fields!</small>
                 </div>
@@ -175,7 +186,7 @@
                 <label>Upload sample sheet:</label>
                 <input type="file" name="sample_sheet" /><br /><br />
                 <button class="btn btn-primary" id="booking-submit" >Submit booking</button>
-                <button class="btn btn-default" id="booking-cancel">Cancel booking</button>
+                <button class="btn btn-warning" id="booking-cancel">Cancel booking</button>
             </fieldset>
         </form>
     </div>
@@ -201,5 +212,23 @@
     {{/if}}
 </template>
 
+<template name="enroll">
+    <div class="row" id="enroll">
+        <div class="span9 center">
+            <h1>SeqBooker <small><span class="atype">s</span><span class="ttype">e</span><span class="ttype">q</span><span
+                                    class="ctype">u</span><span class="atype">e</span><span class="gtype">n</span><span
+                                    class="gtype">c</span><span class="ctype">e</span> resource booking calendar</small></h1>
+            <h4>Enter a password and confirm it to finalise your account. You will be taken to the booking system
+                automatically on submission.</h4>
+            <label>New password: </label><input type="password" name="password" placeholder="enter new password"></input><span id="pass-error"></span>
+            <label>Confirm new password: </label><input type="password" name="confirm" placeholder="confirm password"></input><span id="confirm-error"></span>
+            <br />
+            <button class="btn btn-submit">Submit</button>
+        </div>
+    </div>
+</template>
 
 
+<template name="verified">
+    <h1>Your account has been verified!</h1>
+</template>

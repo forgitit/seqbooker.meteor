@@ -8,9 +8,10 @@ MiseqBookings = new Meteor.Collection 'MiseqBookings'
 # Server
 if Meteor.isServer
 
-    Meteor.startup( ->
-        process.env.MAIL_URL = "smtp://sign-up%40seqbooker.mailgun.org:wxy354KLOP99CX@smtp.mailgun.org:587"
-    )
+    Accounts.urls.verifyEmail = (token) ->
+        Meteor.absoluteUrl 'verify-email/' + token
+    Accounts.urls.enrollAccount = (token) ->
+        Meteor.absoluteUrl 'enroll-account/' + token
 
     Meteor.methods({
         removeAll: () ->
@@ -36,17 +37,9 @@ if Meteor.isServer
                 return false
             else
                 uid = Accounts.createUser(email: email)
-                Meteor.call('sendEmail',
-                    email,
-                    'admin@seqbooker.plantenergy.uwa.edu.au',
-                    'SeqBooker Sign-up Request',
-                    'Sign up!',
-                    (error, result) ->
-                        if error
-                            return false
-                        else
-                            return true
-                )
+                #                Accounts.sendVerificationEmail(uid, email)
+                Accounts.sendEnrollmentEmail uid, email
+                return true
     })
 
     Meteor.publish('HiseqBookings', ->
@@ -81,6 +74,38 @@ if Meteor.isServer
 ###########################################################
 # Client
 if Meteor.isClient
+
+    Router.map ->
+        @route 'main', path: '/', template: 'main'
+        @route 'verified', path: '/verify-email/:token'
+        @route 'enroll', path: '/enroll-account/:token', template: 'enroll'
+
+
+    class @VerifiedController extends RouteController
+
+        waitOn: ->
+            Meteor.subscribe 'userData'
+
+        run: ->
+            token = @params.token
+            console.log token
+            Accounts.verifyEmail token
+            Router.go '/'
+            Session.set 'notify', "You're account has been verified and you have been automatically logged in!"
+            super
+
+    class @EnrollController extends RouteController
+
+        waitOn: ->
+            Meteor.subscribe 'userData'
+
+        run: ->
+            token = @params.token
+            console.log token
+            Session.set 'token', token
+            super
+
+
 
     defaultView = new Date.today()
     Session.setDefault 'view', defaultView
@@ -117,11 +142,15 @@ if Meteor.isClient
                     change_password_helper(form)
             else if evt.which is 27
                 $(form).hide()
-                $('#login').show()
+                if Meteor.user()
+                    $('#logout').show()
+                else
+                    $('#login').show()
         'click #login': (evt,template) ->
             evt.preventDefault()
             $(evt.target).hide()
             form = template.find('form#sign-in-form')
+            $(form).find('input').val('')
             $(form).show()
             $(form).find('input[name="email_address"]').focus()
         'click #logout': (evt, template) ->
@@ -140,7 +169,7 @@ if Meteor.isClient
             $(form).hide()
             span = template.find('span')
             $(span).hide()
-            $('#login').show()
+            $('#logout').show()
         'click #submit-login': (evt, template) ->
             evt.preventDefault()
             form = template.find('form:visible')
@@ -161,6 +190,7 @@ if Meteor.isClient
             form = template.find('form:visible')
             $(form).hide()
             $('#change-password-form').show()
+            $('#change-password-form').find('input[name=old_password]').focus()
         'click #submit-password-change': (evt, template) ->
             evt.preventDefault()
             form = template.find('form:visible')
@@ -185,41 +215,56 @@ if Meteor.isClient
         )
 
     login_helper = (form) ->
-        email = $(form).find('input[name="email_address"]').val()
-        password= $(form).find('input[name="password"]').val()
+        email = $(form).find('input[name="email_address"]')
+        password= $(form).find('input[name="password"]')
         error = $(form).find('span')
-        if not email
-            error.text('No email supplied!').show().fadeOut(2500)
+        if not email.val()
+            error.text('No email supplied!').show().delay(1000).fadeOut(2500)
+            email.focus()
             return false
-        if not password
-            error.text('No password supplied!').show().fadeOut(2500)
+        if not password.val()
+            error.text('No password supplied!').show().delay(1000).fadeOut(2500)
+            password.focus()
             return false
-        Meteor.loginWithPassword(email, password, (err) ->
+        Meteor.loginWithPassword(email.val(), password.val(), (err) ->
             if err
-                error.text('Server error').show().fadeOut(2500)
-            else
-                $('form#sign-in').hide()
+                console.log err
+                if err.message is "Incorrect password [403]"
+                    Session.set 'notify', 'Oops! Incorrect password entered! Please try again.'
+
+                    return false
+                if err.message is "User not found [403]"
+                    Session.set 'notify', 'Oops! No user found with specified email address! Please try again.'
+                    return false
         )
+        if Meteor.user()
+            $('form#sign-in').hide()
+            $(email).val('')
+            $(password).val('')
+
 
     account_create_helper = (form) ->
         input = $(form).find('input[name="email_address"]')
         email = $(input).val()
         err = $(form).find('span')
         if not email
-            $(err).text('No email supplied!').show().fadeOut(2500)
+            $(err).text('Oops! No email supplied!').show().delay(1000).fadeOut(2500)
+            input.focus()
             return false
         Meteor.call('initNewUser', email, (error, result) ->
-            if not error
-                $(form).hide()
-                console.log 'enrollment sent'
-            else
-                $(error).text('Email address already in use!').show().fadeOut(2500)
+            if result is false or result is undefined
+                $(err).text('Oops! Email already in use!').show().delay(1000).fadeOut(2500)
+                input.focus()
                 return false
+            else
+                console.log 'account create success'
+                $(form).hide()
+                Session.set 'notify', 'A verification email has been sent to ' + email + '. Follow the instructions to verify your account' 
         )
 
 
     Meteor.startup ->
-        $('table#calendar').selectable({filter: 'td'})
+        $('table#calendar').selectable({filter: 'td.day'})
         $( document ).tooltip(
             position:
                 my: "center bottom+80",
@@ -231,6 +276,11 @@ if Meteor.isClient
                         .addClass( feedback.vertical )
                         .addClass( feedback.horizontal )
                         .appendTo( this )
+        )
+        $('#datepicker').datepicker(
+            showOn: "button"
+            numberOfMonths: 3
+            showButtonPanel: true
         )
         Meteor.setTimeout (->
             Session.set 'dom_is_ready', true
@@ -244,20 +294,16 @@ if Meteor.isClient
             calObj Session.get 'view'
         bookable: ->
             Session.get 'bookable'
-        verified: ->
-            if Meteor.userId()and Meteor.user().emails[0].verified
-                Session.set 'verified', true
-            else
-                Session.set 'verified', false
-            Session.get 'verified'
     )
 
     Template.control_panel.bookable = ->
         Session.get 'bookable'
 
     Template.cal.rendered = ->
-        $('table#calendar').selectable({filter: 'td'})
-        if Session.equals 'bookable', false
+        if Session.get 'bookable'
+            $('table#calendar').selectable({filter: 'td:not(.disable)'})
+        else
+            $('table#calendar').selectable({filter: 'td.booked'})
             Session.set 'notify', 'Booking is disabled in the current view due to viewing past dates'
 
     Template.cal.events =
@@ -271,12 +317,16 @@ if Meteor.isClient
             view = Session.get 'view'
             newView = view.addMonths 1
             Session.set 'view', newView
+        'click #curr-month': (evt) ->
+            evt.preventDefault()
+            Session.set 'view', defaultView
 
     Template.control_panel.selected = ->
         Session.get 'sequencer'
 
     # Preserving elements associated with the JQuery tooltip as template rendering causes tooltip to become stuck
     Template.control_panel.preserve(['a.seq-selected', 'img#hiseq', 'img#miseq'])
+    Template.cal.preserve(['#curr-month'])
 
     Template.control_panel.rendered = ->
         seq = Session.get 'sequencer'
@@ -328,8 +378,7 @@ if Meteor.isClient
     Template.control_panel.events =
         'click #btn-book': (evt) ->
             evt.preventDefault()
-            user = Session.get 'user'
-            if not user
+            if not Meteor.user()
                 Session.set 'notify', 'Please login before making a booking!'
                 return false
             if not $('a.seq-select').children('img').hasClass('seq-selected')
@@ -344,12 +393,9 @@ if Meteor.isClient
                 return false
             else
                 Session.set 'bookForm', true
-                bookInFocus = $('#booking-form input:first')
-                bookInFocus.focus()
         'click #btn-unbook': (evt) ->
             evt.preventDefault()
-            user = Session.get 'user'
-            if not user
+            if not Meteor.user()
                 Session.set 'notify','Please login before making changes to a booking!'
                 return false
             dates = []
@@ -458,6 +504,35 @@ if Meteor.isClient
             ), 5000
         notify
 
+    Template.enroll.rendered = ->
+        $('input[name=password]').focus()
+
+    Template.enroll.events =
+        'click .btn': (evt, tpl) ->
+            evt.preventDefault()
+            password = tpl.find('input[name=password]')
+            confirm = tpl.find('input[name=confirm]')
+            if password.value is null and confirm.value is null
+                password.focus()
+                return false
+            else if password.value is null
+                $(password).focus()
+                return false
+            else if confirm is null
+                $(confirm).focus()
+                return false
+            if password.value is confirm.value
+                if password.value.length > 5 
+                    token = Session.get 'token'
+                    console.log token
+                    Router.go('/') if token
+                    Accounts.resetPassword token, password.value
+                else
+                    console.log 'pass too short'
+            else
+                console.log 'not equal'
+                return false
+
     Template.admin.info = ->
         if Meteor.user() and Meteor.user().admin
             view = Session.get 'view'
@@ -512,7 +587,7 @@ if Meteor.isClient
         else
             Session.set 'bookable', true
         calendar.firstDayCell = dateObj.moveToFirstDayOfMonth().getDay()
-        calendar.todayDate= new Date().getDate() - 1
+        calendar.todayDate= new Date().getDate() + 1
         calendar.lastDayCell = dateObj.moveToLastDayOfMonth().getDate() + calendar.firstDayCell - 1
         calendar.daysInMonth = dateObj.getDaysInMonth()
         if calendar.daysInMonth + calendar.firstDayCell > 35
@@ -533,6 +608,8 @@ if Meteor.isClient
             cssclass = ''
             if cell is calendar.todayDate and (defaultView.getMonth() + 1) is calendar.month
                 cssclass+=" today"
+            if cell < calendar.todayDate and (defaultView.getMonth() + 1) is calendar.month
+                cssclass+=" disable"
             if cell >= calendar.firstDayCell and cell <= calendar.lastDayCell
                 dayNum = dayNumThisMonth
                 datetime = calendar.year + '-' + calendar.month + '-' + dayNum
